@@ -14,4 +14,4 @@
 # limitations under the License.
 
 # Rules for QCOM targets
-include $(TOPDIR)vendor/voltage/build/core/qcom_target.mk
+include $(TOPDIR)vendor/lessaosp/build/core/qcom_target.mk

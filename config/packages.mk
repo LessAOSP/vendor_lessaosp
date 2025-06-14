@@ -1,10 +1,10 @@
-# VoltageOS packages
+# LessAOSP packages
 PRODUCT_PACKAGES += \
     ThemePicker \
     AvatarPicker \
     ThemesStub \
 
-# Extra tools in Voltage
+# Extra tools in LESSAOSP
 PRODUCT_PACKAGES += \
     awk \
     bzip2 \
@@ -19,7 +19,7 @@ PRODUCT_PACKAGES += \
     mke2fs \
     mkfs.exfat
 
-# VoltageOS UDFPS animations
+# LessAOSP UDFPS animations
 ifeq ($(EXTRA_UDFPS_ANIMATIONS),true)
 PRODUCT_PACKAGES += \
     UdfpsIcons \

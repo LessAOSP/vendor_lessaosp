@@ -1,16 +1,16 @@
-function __print_voltageos_functions_help() {
+function __print_lessaosp_functions_help() {
 cat <<EOF
-Additional VoltageOS functions:
+Additional LessAOSP functions:
 - cout:            Changes directory to out.
 - mmp:             Builds all of the modules in the current directory and pushes them to the device.
 - mmap:            Builds all of the modules in the current directory and its dependencies, then pushes the package to the device.
 - mmmp:            Builds all of the modules in the supplied directories and pushes them to the device.
-- voltagegerrit:   A Git wrapper that fetches/pushes patch from/to VoltageOS Gerrit Review.
-- voltagerebase:   Rebase a Gerrit change and push it again.
-- voltageremote:   Add git remote for VoltageOS Gerrit Review.
+- lessaospgerrit:   A Git wrapper that fetches/pushes patch from/to LessAOSP Gerrit Review.
+- lessaosprebase:   Rebase a Gerrit change and push it again.
+- lessaospremote:   Add git remote for LessAOSP Gerrit Review.
 - aospremote:      Add git remote for matching AOSP repository.
 - cafremote:       Add git remote for matching CodeAurora repository.
-- githubremote:    Add git remote for VoltageOS Github.
+- githubremote:    Add git remote for LessAOSP Github.
 - mka:             Builds using SCHED_BATCH on all processors.
 - mkap:            Builds the module(s) using mka and pushes them to the device.
 - cmka:            Cleans and builds using mka.
@@ -71,7 +71,7 @@ function breakfast()
 {
     target=$1
     local variant=$2
-    source ${ANDROID_BUILD_TOP}/vendor/voltage/vars/aosp_target_release
+    source ${ANDROID_BUILD_TOP}/vendor/lessaosp/vars/aosp_target_release
 
     if [ $# -eq 0 ]; then
         # No arguments, so let's have the full menu
@@ -81,12 +81,12 @@ function breakfast()
             # A buildtype was specified, assume a full device name
             lunch $target
         else
-            # This is probably just the VoltageOS model name
+            # This is probably just the LessAOSP model name
             if [ -z "$variant" ]; then
                 variant="user"
             fi
 
-            lunch voltage_$target-$aosp_target_release-$variant
+            lunch lessaosp_$target-$aosp_target_release-$variant
         fi
     fi
     return $?
@@ -97,7 +97,7 @@ alias bib=breakfast
 function eat()
 {
     if [ "$OUT" ] ; then
-        ZIPPATH=`ls -tr "$OUT"/voltage-*.zip | tail -1`
+        ZIPPATH=`ls -tr "$OUT"/lessaosp-*.zip | tail -1`
         if [ ! -f $ZIPPATH ] ; then
             echo "Nothing to eat"
             return 1
@@ -105,13 +105,13 @@ function eat()
         echo "Waiting for device..."
         adb wait-for-device-recovery
         echo "Found device"
-        if (adb shell getprop ro.voltage.device | grep -q "$VOLTAGE_BUILD"); then
+        if (adb shell getprop ro.lessaosp.device | grep -q "$LESSAOSP_BUILD"); then
             echo "Rebooting to sideload for install"
             adb reboot sideload-auto-reboot
             adb wait-for-sideload
             adb sideload $ZIPPATH
         else
-            echo "The connected device does not appear to be $VOLTAGE_BUILD, run away!"
+            echo "The connected device does not appear to be $LESSAOSP_BUILD, run away!"
         fi
         return $?
     else
@@ -235,43 +235,43 @@ function dddclient()
    fi
 }
 
-function voltageremote()
+function lessaospremote()
 {
     if ! git rev-parse --git-dir &> /dev/null
     then
         echo ".git directory not found. Please run this from the root directory of the Android repository you wish to set up."
         return 1
     fi
-    git remote rm voltage 2> /dev/null
+    git remote rm lessaosp 2> /dev/null
     local REMOTE=$(git config --get remote.github.projectname)
-    local VOLTAGE="true"
+    local LESSAOSP="true"
     if [ -z "$REMOTE" ]
     then
         REMOTE=$(git config --get remote.aosp.projectname)
-        VOLTAGE="false"
+        LESSAOSP="false"
     fi
     if [ -z "$REMOTE" ]
     then
         REMOTE=$(git config --get remote.caf.projectname)
-        VOLTAGE="false"
+        LESSAOSP="false"
     fi
 
-    if [ $VOLTAGE = "false" ]
+    if [ $LESSAOSP = "false" ]
     then
         local PROJECT=$(echo $REMOTE | sed -e "s#platform/#android/#g; s#/#_#g")
-        local PFX="VoltageOS/"
+        local PFX="LessAOSP/"
     else
         local PROJECT=$REMOTE
     fi
 
-    local VOLTAGE_USER=$(git config --get review.review.voltageos.org.username)
-    if [ -z "$VOLTAGE_USER" ]
+    local LESSAOSP_USER=$(git config --get review.review.lessaosp.org.username)
+    if [ -z "$LESSAOSP_USER" ]
     then
-        git remote add voltage ssh://review.voltageos.org:29418/$PFX$PROJECT
+        git remote add lessaosp ssh://review.lessaosp.org:29418/$PFX$PROJECT
     else
-        git remote add Voltage ssh://$VOLTAGE_USER@review.voltageos.org:29418/$PFX$PROJECT
+        git remote add LESSAOSP ssh://$LESSAOSP_USER@review.lessaosp.org:29418/$PFX$PROJECT
     fi
-    echo "Remote 'voltage' created"
+    echo "Remote 'lessaosp' created"
 }
 
 function aospremote()
@@ -339,7 +339,7 @@ function githubremote()
 
     local PROJECT=$(echo $REMOTE | sed -e "s#platform/#android/#g; s#/#_#g")
 
-    git remote add github https://github.com/VoltageOS/$PROJECT
+    git remote add github https://github.com/LessAOSP/$PROJECT
     echo "Remote 'github' created"
 }
 
@@ -370,14 +370,14 @@ function installboot()
     adb wait-for-device-recovery
     adb root
     adb wait-for-device-recovery
-    if (adb shell getprop ro.voltage.device | grep -q "$VOLTAGE_BUILD");
+    if (adb shell getprop ro.lessaosp.device | grep -q "$LESSAOSP_BUILD");
     then
         adb push $OUT/boot.img /cache/
         adb shell dd if=/cache/boot.img of=$PARTITION
         adb shell rm -rf /cache/boot.img
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $VOLTAGE_BUILD, run away!"
+        echo "The connected device does not appear to be $LESSAOSP_BUILD, run away!"
     fi
 }
 
@@ -408,14 +408,14 @@ function installrecovery()
     adb wait-for-device-recovery
     adb root
     adb wait-for-device-recovery
-    if (adb shell getprop ro.voltage.device | grep -q "$VOLTAGE_BUILD");
+    if (adb shell getprop ro.lessaosp.device | grep -q "$LESSAOSP_BUILD");
     then
         adb push $OUT/recovery.img /cache/
         adb shell dd if=/cache/recovery.img of=$PARTITION
         adb shell rm -rf /cache/recovery.img
         echo "Installation complete."
     else
-        echo "The connected device does not appear to be $VOLTAGE_BUILD, run away!"
+        echo "The connected device does not appear to be $LESSAOSP_BUILD, run away!"
     fi
 }
 
@@ -435,13 +435,13 @@ function makerecipe() {
     if [ "$REPO_REMOTE" = "github" ]
     then
         pwd
-        voltageremote
-        git push voltage HEAD:refs/heads/'$1'
+        lessaospremote
+        git push lessaosp HEAD:refs/heads/'$1'
     fi
     '
 }
 
-function voltagegerrit() {
+function lessaospgerrit() {
     if [ "$(basename $SHELL)" = "zsh" ]; then
         # zsh does not define FUNCNAME, derive from funcstack
         local FUNCNAME=$funcstack[1]
@@ -451,7 +451,7 @@ function voltagegerrit() {
         $FUNCNAME help
         return 1
     fi
-    local user=`git config --get review.review.voltageos.org.username`
+    local user=`git config --get review.review.lessaosp.org.username`
     local review=`git config --get remote.github.review`
     local project=`git config --get remote.github.projectname`
     local command=$1
@@ -487,7 +487,7 @@ EOF
             case $1 in
                 __cmg_*) echo "For internal use only." ;;
                 changes|for)
-                    if [ "$FUNCNAME" = "voltagegerrit" ]; then
+                    if [ "$FUNCNAME" = "lessaospgerrit" ]; then
                         echo "'$FUNCNAME $1' is deprecated."
                     fi
                     ;;
@@ -580,7 +580,7 @@ EOF
                 ${local_branch}:refs/for/$remote_branch || return 1
             ;;
         changes|for)
-            if [ "$FUNCNAME" = "voltagegerrit" ]; then
+            if [ "$FUNCNAME" = "lessaospgerrit" ]; then
                 echo >&2 "'$FUNCNAME $command' is deprecated."
             fi
             ;;
@@ -679,15 +679,15 @@ EOF
     esac
 }
 
-function voltagerebase() {
+function lessaosprebase() {
     local repo=$1
     local refs=$2
     local pwd="$(pwd)"
     local dir="$(gettop)/$repo"
 
     if [ -z $repo ] || [ -z $refs ]; then
-        echo "VoltageOS Gerrit Rebase Usage: "
-        echo "      voltagerebase <path to project> <patch IDs on Gerrit>"
+        echo "LessAOSP Gerrit Rebase Usage: "
+        echo "      lessaosprebase <path to project> <patch IDs on Gerrit>"
         echo "      The patch IDs appear on the Gerrit commands that are offered."
         echo "      They consist on a series of numbers and slashes, after the text"
         echo "      refs/changes. For example, the ID in the following command is 26/8126/2"
@@ -708,7 +708,7 @@ function voltagerebase() {
     echo "Bringing it up to date..."
     repo sync .
     echo "Fetching change..."
-    git fetch "http://review.voltageos.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
+    git fetch "http://review.lessaosp.org/p/$repo" "refs/changes/$refs" && git cherry-pick FETCH_HEAD
     if [ "$?" != "0" ]; then
         echo "Error cherry-picking. Not uploading!"
         return
@@ -792,7 +792,7 @@ function dopush()
         echo "Device Found."
     fi
 
-    if (adb shell getprop ro.voltage.device | grep -q "$VOLTAGE_BUILD") || [ "$FORCE_PUSH" = "true" ];
+    if (adb shell getprop ro.lessaosp.device | grep -q "$LESSAOSP_BUILD") || [ "$FORCE_PUSH" = "true" ];
     then
     # retrieve IP and PORT info if we're using a TCP connection
     TCPIPPORT=$(adb devices \
@@ -911,7 +911,7 @@ EOF
     rm -f $OUT/.log
     return 0
     else
-        echo "The connected device does not appear to be $VOLTAGE_BUILD, run away!"
+        echo "The connected device does not appear to be $LESSAOSP_BUILD, run away!"
     fi
 }
 
@@ -924,14 +924,14 @@ alias cmkap='dopush cmka'
 
 function repopick() {
     T=$(gettop)
-    $T/vendor/voltage/build/tools/repopick.py $@
+    $T/vendor/lessaosp/build/tools/repopick.py $@
 }
 
 function fixup_common_out_dir() {
     common_out_dir=$(get_build_var OUT_DIR)/target/common
     target_device=$(get_build_var TARGET_DEVICE)
     common_target_out=common-${target_device}
-    if [ ! -z $VOLTAGE_FIXUP_COMMON_OUT ]; then
+    if [ ! -z $LESSAOSP_FIXUP_COMMON_OUT ]; then
         if [ -d ${common_out_dir} ] && [ ! -L ${common_out_dir} ]; then
             mv ${common_out_dir} ${common_out_dir}-${target_device}
             ln -s ${common_target_out} ${common_out_dir}

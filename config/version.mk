@@ -13,45 +13,58 @@
 # limitations under the License.
 
 ANDROID_VERSION := 16
-VOLTAGEVERSION := 5.0
+LESSAOSPVERSION := 1.0
+LESSAOSP_BUILD_ROM_TYPE := VANILLA
 
-VOLTAGE_BUILD_TYPE ?= UNOFFICIAL
-VOLTAGE_DATE_YEAR := $(shell date -u +%Y)
-VOLTAGE_DATE_MONTH := $(shell date -u +%m)
-VOLTAGE_DATE_DAY := $(shell date -u +%d)
-VOLTAGE_DATE_HOUR := $(shell date -u +%H)
-VOLTAGE_DATE_MINUTE := $(shell date -u +%M)
-VOLTAGE_BUILD_DATE := $(VOLTAGE_DATE_YEAR)$(VOLTAGE_DATE_MONTH)$(VOLTAGE_DATE_DAY)-$(VOLTAGE_DATE_HOUR)$(VOLTAGE_DATE_MINUTE)
-TARGET_PRODUCT_SHORT := $(subst voltage_,,$(VOLTAGE_BUILD))
+LESSAOSP_BUILD_TYPE ?= UNOFFICIAL
+LESSAOSP_DATE_YEAR := $(shell date -u +%Y)
+LESSAOSP_DATE_MONTH := $(shell date -u +%m)
+LESSAOSP_DATE_DAY := $(shell date -u +%d)
+LESSAOSP_DATE_HOUR := $(shell date -u +%H)
+LESSAOSP_DATE_MINUTE := $(shell date -u +%M)
+LESSAOSP_BUILD_DATE := $(LESSAOSP_DATE_YEAR)$(LESSAOSP_DATE_MONTH)$(LESSAOSP_DATE_DAY)-$(LESSAOSP_DATE_HOUR)$(LESSAOSP_DATE_MINUTE)
+TARGET_PRODUCT_SHORT := $(subst lessaosp_,,$(LESSAOSP_BUILD))
+
+# GAPPS
+LESSAOSP_GAPPS ?= false
+ifeq ($(LESSAOSP_GAPPS), true)
+    ifeq ($(LESSAOSP_GO), true)
+        $(call inherit-product, vendor/partner_gms/products/gms_go_2gb.mk)
+    else
+        $(call inherit-product, vendor/partner_gms/products/gms.mk)
+    endif
+    LESSAOSP_BUILD_ROM_TYPE := GAPPS
+endif
 
 # OFFICIAL_DEVICES
-ifeq ($(VOLTAGE_BUILD_TYPE), OFFICIAL)
-  LIST = $(shell cat vendor/voltage/voltage.devices)
-    ifeq ($(filter $(VOLTAGE_BUILD), $(LIST)), $(VOLTAGE_BUILD))
+ifeq ($(LESSAOSP_BUILD_TYPE), OFFICIAL)
+  LIST = $(shell cat vendor/lessaosp/lessaosp.devices)
+    ifeq ($(filter $(LESSAOSP_BUILD), $(LIST)), $(LESSAOSP_BUILD))
       IS_OFFICIAL=true
-      VOLTAGE_BUILD_TYPE := OFFICIAL
+      LESSAOSP_BUILD_TYPE := OFFICIAL
     endif
     ifneq ($(IS_OFFICIAL), true)
-      VOLTAGE_BUILD_TYPE := UNOFFICIAL
-      $(error Device is not official "$(VOLTAGE_BUILD)")
+      LESSAOSP_BUILD_TYPE := UNOFFICIAL
+      $(error Device is not official "$(LESSAOSP_BUILD)")
     endif
 endif
 
-VOLTAGE_VERSION := $(VOLTAGEVERSION)-$(VOLTAGE_BUILD)-$(VOLTAGE_BUILD_DATE)-$(VOLTAGE_BUILD_TYPE)
-VOLTAGE_MOD_VERSION :=$(ANDROID_VERSION)-$(VOLTAGEVERSION)
-VOLTAGE_DISPLAY_VERSION := VoltageOS-$(VOLTAGEVERSION)-$(VOLTAGE_BUILD_TYPE)
-VOLTAGE_DISPLAY_BUILDTYPE := $(VOLTAGE_BUILD_TYPE)
-VOLTAGE_FINGERPRINT := VoltageOS/$(VOLTAGE_MOD_VERSION)/$(TARGET_PRODUCT_SHORT)/$(VOLTAGE_BUILD_DATE)
-VOLTAGE_PLATFORM_RELEASE_OR_CODENAME := 15.0
+LESSAOSP_VERSION := $(LESSAOSPVERSION)-$(LESSAOSP_BUILD)-$(LESSAOSP_BUILD_DATE)-$(LESSAOSP_BUILD_TYPE)-$(LESSAOSP_BUILD_ROM_TYPE)
+LESSAOSP_MOD_VERSION :=$(ANDROID_VERSION)-$(LESSAOSPVERSION)
+LESSAOSP_DISPLAY_VERSION := LessAOSP-$(LESSAOSPVERSION)-$(LESSAOSP_BUILD_TYPE)-$(LESSAOSP_BUILD_ROM_TYPE)
+LESSAOSP_DISPLAY_BUILDTYPE := $(LESSAOSP_BUILD_TYPE)
+LESSAOSP_FINGERPRINT := LessAOSP/$(LESSAOSP_MOD_VERSION)/$(TARGET_PRODUCT_SHORT)/$(LESSAOSP_BUILD_DATE)
+LESSAOSP_PLATFORM_RELEASE_OR_CODENAME := 16.0
 
-# Voltageos System Version
+# LessAOSP System Version
 PRODUCT_SYSTEM_DEFAULT_PROPERTIES += \
-  ro.voltage.version=$(VOLTAGE_DISPLAY_VERSION) \
-  ro.voltage.build.status=$(VOLTAGE_BUILD_TYPE) \
-  ro.modversion=$(VOLTAGE_MOD_VERSION) \
-  ro.voltage.build.date=$(VOLTAGE_BUILD_DATE) \
-  ro.voltage.buildtype=$(VOLTAGE_BUILD_TYPE) \
-  ro.voltage.fingerprint=$(VOLTAGE_FINGERPRINT) \
-  ro.voltage.device=$(VOLTAGE_BUILD) \
-  ro.voltage.platform_release_or_codename=$(VOLTAGE_PLATFORM_RELEASE_OR_CODENAME) \
-  org.voltage.version=$(VOLTAGEVERSION)
+  ro.lessaosp.version=$(LESSAOSP_DISPLAY_VERSION) \
+  ro.lessaosp.build.status=$(LESSAOSP_BUILD_TYPE) \
+  ro.modversion=$(LESSAOSP_MOD_VERSION) \
+  ro.lessaosp.build.date=$(LESSAOSP_BUILD_DATE) \
+  ro.lessaosp.buildtype=$(LESSAOSP_BUILD_TYPE) \
+  ro.lessaosp.fingerprint=$(LESSAOSP_FINGERPRINT) \
+  ro.lessaosp.device=$(LESSAOSP_BUILD) \
+  ro.lessaosp.platform_release_or_codename=$(LESSAOSP_PLATFORM_RELEASE_OR_CODENAME) \
+  org.lessaosp.version=$(LESSAOSPVERSION) \
+  ro.lessaosp.romtype=$(LESSAOSP_BUILD_ROM_TYPE)

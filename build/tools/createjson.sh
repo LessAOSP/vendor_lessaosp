@@ -25,7 +25,7 @@ if [ -f $existingOTAjson ]; then
 	device=`grep -n "\"device\"" $existingOTAjson | cut -d ":" -f 3 | sed 's/"//g' | sed 's/,//g' | xargs`
 	filename=$3
 	version=`echo "$3" | cut -d'-' -f2`
-	download="https://sourceforge.net/projects/voltage-os/files/$1/$filename/download"
+	download="https://sourceforge.net/projects/lessaosp/files/$1/$filename/download"
 	buildprop=$2/system/build.prop
 	linenr=`grep -n "ro.system.build.date.utc" $buildprop | cut -d':' -f1`
 	timestamp=`sed -n $linenr'p' < $buildprop | cut -d'=' -f2`

@@ -1,5 +1,5 @@
 #!/bin/bash
-# AOSP tag merge script for VoltageOS
+# AOSP tag merge script for LessAOSP
 # Author: Adithya R (ghostrider_reborn)
 
 # Colors
@@ -8,7 +8,7 @@ grn=$'\e[1;32m'
 blu=$'\e[1;34m'
 end=$'\e[0m'
 
-REMOTE="voltage"
+REMOTE="lessaosp"
 BRANCH="12"
 
 BLACKLIST="manifest \

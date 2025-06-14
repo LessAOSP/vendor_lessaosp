@@ -1,5 +1,5 @@
-# Inherit common mobile Voltage stuff
-$(call inherit-product, vendor/voltage/config/common.mk)
+# Inherit common mobile LESSAOSP stuff
+$(call inherit-product, vendor/lessaosp/config/common.mk)
 
 # Charger
 PRODUCT_PACKAGES += \
